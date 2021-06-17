@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    return queryInterface.createTable('todo_item', {
+    return queryInterface.createTable('todos', {
       id: { 
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -19,12 +19,20 @@ module.exports = {
       descricao: {
         type:  Sequelize.STRING,
         allowNull: false,
-      },    
+      }, 
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },   
     });     
   },
 
   down: async (queryInterface, Sequelize) => {
-    return await queryInterface.dropTable('todo_item');
+    return await queryInterface.dropTable('todos');
      
   }
 };

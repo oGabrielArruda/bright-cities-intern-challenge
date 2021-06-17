@@ -10,7 +10,7 @@ module.exports = {
         const status = await Status.findAll({
             where: whereStatement,
         });
-        console.log(status);
+        
         return res.json(status);
     },
 
