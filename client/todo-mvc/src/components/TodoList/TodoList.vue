@@ -28,14 +28,14 @@
             :class="{ completed: todo.completed, editing: todo == editedTodo }"
           >
             <div class="view">
-              <input class="toggle" type="checkbox" v-model="todo.completed"/>
-              <label @dblclick="editTodo(todo)">{{ todo.title }}</label>
+              <input class="toggle" type="checkbox" v-model="todo.completed" @change="changeCompleted(todo)"/>
+              <label @dblclick="editTodo(todo)">{{ todo.descricao }}</label>
               <button class="destroy" @click="removeTodo(todo)"></button>
             </div>
             <input
               class="edit"
               type="text"
-              v-model="todo.title"
+              v-model="todo.descricao"
               v-todo-focus="todo == editedTodo"
               @blur="doneEdit(todo)"
               @keyup.enter="doneEdit(todo)"
@@ -85,7 +85,9 @@
 </template>
 
 <script>
+import api from '../../config/api';
 const todoStorage = require('./store');
+
 export default {
   name: "TodoList",
   props: {
@@ -94,7 +96,7 @@ export default {
   // app initial state
   data() {
     return {
-      todos: todoStorage.fetch(),
+      todos: null,
       newTodo: "",
       editedTodo: null,
       visibility: "all",
@@ -114,6 +116,13 @@ export default {
         },
       },
     };
+  },
+  mounted() {    
+    api.get("/todos")
+    .then(response => {      
+      this.todos = response.data;
+      console.log(this.todos);
+    });
   },
 
   // watch todos change for localStorage persistence
@@ -152,22 +161,24 @@ export default {
       return word + (count === 1 ? "" : "s");
     },
 
-    addTodo: function () {
+    addTodo: async function () {
       var value = this.newTodo && this.newTodo.trim();
       if (!value) {
         return;
       }
-      this.todos.push({
-        id: this.todos.length + 1,
-        title: value,
-        completed: false,
-      });
+
+      const response = await api.post('/todos', { descricao: value, completed: false });
+      this.todos.push(response.data);
+
+      
       this.newTodo = "";
     },
 
-    removeTodo: function (todo) {
+    removeTodo: async function (todo) {
       var index = this.todos.indexOf(todo);
       this.todos.splice(index, 1);
+
+      await api.delete(`/todos/${todo.id}`);
     },
 
     editTodo: function (todo) {
@@ -175,13 +186,16 @@ export default {
       this.editedTodo = todo;
     },
 
-    doneEdit: function (todo) {
+    doneEdit: async function (todo) {
       if (!this.editedTodo) {
         return;
       }
       this.editedTodo = null;
-      todo.title = todo.title.trim();
-      if (!todo.title) {
+      todo.descricao = todo.descricao.trim();
+
+      if (todo.descricao) {
+        await api.put(`/todos/${todo.id}`, { descricao: todo.descricao, completed: todo.completed });
+      } else {
         this.removeTodo(todo);
       }
     },
@@ -191,7 +205,17 @@ export default {
       todo.title = this.beforeEditCache;
     },
 
-    removeCompleted: function () {
+    changeCompleted: async function (todo) {
+      await api.put(`/todos/${todo.id}`, { descricao: todo.descricao, completed: todo.completed });
+    },
+    removeCompleted: async function () {
+     const toRemove = this.filters.completed(this.todos);
+     
+     toRemove.forEach(async (t) => {
+       console.log(t);
+       await api.delete(`/todos/${t.id}`);
+     })
+
       this.todos = this.filters.active(this.todos);
     },
   },
