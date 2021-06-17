@@ -9,12 +9,9 @@ module.exports = {
         autoIncrement: true,
         allowNull: false,
       },
-      status_id: {
-        type: Sequelize.INTEGER,
+      completed: {
+        type: Sequelize.BOOLEAN,
         allowNull: true,
-        references: { model: 'status', key: 'id' },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
       },
       descricao: {
         type:  Sequelize.STRING,

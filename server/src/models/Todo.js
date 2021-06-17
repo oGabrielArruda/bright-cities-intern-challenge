@@ -5,13 +5,10 @@ class Todo extends Model {
     static init(sequelize) {
         super.init({
             descricao: DataTypes.STRING,
+            completed: DataTypes.BOOLEAN,
         }, {
             sequelize
         })
-    }
-
-    static associate(models) {
-        this.belongsTo(models.Status, { foreignKey: 'status_id', as: 'status_owner' });
     }
 }
 
