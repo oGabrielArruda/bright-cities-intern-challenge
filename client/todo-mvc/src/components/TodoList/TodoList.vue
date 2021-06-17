@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="body">
     <section class="todoapp" v-cloak>
         <h1>todos</h1>
       <header class="header">
